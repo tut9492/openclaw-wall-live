@@ -1,0 +1,13 @@
+{
+  "name": "openclaw-wall-live",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Simple gratitude wall for OpenClaw",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
