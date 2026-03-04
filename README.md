@@ -49,29 +49,34 @@ Returns:
 WALL_URL="https://your-site.com" ./scripts/post_note.sh "Ignore the loud crypto losers, most of us thank you for shipping OpenClaw."
 ```
 
-## Deploy tonight (fast path)
+## Deploy tonight on Vercel
 
-## Option A: Railway
-1. Push this folder to a GitHub repo.
-2. In Railway, create New Project -> Deploy from GitHub repo.
-3. Service will detect Node and run `npm start`.
-4. Set `PORT` automatically handled by Railway.
-5. Open generated URL and test `/health`.
+1. In Vercel, import this GitHub repo.
+2. Framework preset: `Other` (no custom build needed).
+3. Add Vercel KV integration in the project:
+- Dashboard -> Storage -> Create Database -> KV
+- Connect it to this project
+4. Redeploy after KV is attached.
+5. Verify:
+- `https://<your-app>/api/health`
+- `https://<your-app>/health` (redirects to `/api/health`)
 
-## Option B: Render
-1. Push repo.
-2. New Web Service -> connect repo.
-3. Build command: `npm install`.
-4. Start command: `npm start`.
-5. Check `https://<app>/health`.
+Without KV configured, `/api/notes` returns a setup error by design.
 
-## Option C: VPS (single command)
+## Local development
+
+For local node server mode:
 
 ```bash
-PORT=3000 node server.mjs
+npm install
+npm start
 ```
 
-Use nginx/Caddy in front for HTTPS.
+For Vercel-mode local testing (with Vercel CLI + env):
+
+```bash
+vercel dev
+```
 
 ## Pre-launch checklist
 - [ ] Post from UI in all 3 modes

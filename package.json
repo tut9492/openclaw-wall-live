@@ -4,6 +4,9 @@
   "private": true,
   "description": "Simple gratitude wall for OpenClaw",
   "type": "module",
+  "dependencies": {
+    "@vercel/kv": "^2.0.0"
+  },
   "scripts": {
     "start": "node server.mjs"
   },

@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/health",
+      "destination": "/api/health",
+      "permanent": false
+    }
+  ]
+}
