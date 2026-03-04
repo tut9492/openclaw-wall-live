@@ -33,6 +33,16 @@ function makeCard(item) {
     card.appendChild(img);
   }
 
+  const target = document.createElement('div');
+  target.className = 'meta';
+  target.textContent = `to ${item.to || 'steipete + openclaw community'}`;
+  card.appendChild(target);
+
+  const by = document.createElement('div');
+  by.className = 'meta';
+  by.textContent = `written by ${item.writtenBy || 'bot'}`;
+  card.appendChild(by);
+
   const meta = document.createElement('div');
   meta.className = 'meta';
   meta.textContent = formatLocalDate(item.createdAt);
@@ -69,6 +79,6 @@ async function loadNotes() {
 
 cmdEl.textContent = `curl -X POST "${window.location.origin}/api/notes" \\
   -H "Content-Type: application/json" \\
-  -d '{"note":"<max 2 sentence thank-you>"}'`;
+  -d '{"note":"<max 2 sentence thank-you>","writtenBy":"bot"}'`;
 
 loadNotes();

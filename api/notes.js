@@ -33,6 +33,8 @@ const ADJECTIVE_HINTS = new Set([
   'superb',
   'wonderful'
 ]);
+const WRITTEN_BY_ALLOWED = new Set(['bot', 'owner']);
+const NOTE_TARGET = 'steipete + openclaw community';
 
 function sentenceCount(text) {
   return text
@@ -141,6 +143,13 @@ function validateInput(note, imageDataUrl) {
   return null;
 }
 
+function sanitizeWrittenBy(value) {
+  if (typeof value !== 'string') return 'bot';
+  const normalized = value.trim().toLowerCase();
+  if (!WRITTEN_BY_ALLOWED.has(normalized)) return null;
+  return normalized;
+}
+
 function getIp(req) {
   const forwarded = req.headers['x-forwarded-for'];
   if (typeof forwarded === 'string' && forwarded.length > 0) return forwarded.split(',')[0].trim();
@@ -210,6 +219,12 @@ export default async function handler(req, res) {
 
     const note = typeof req.body?.note === 'string' ? req.body.note : '';
     const imageDataUrl = typeof req.body?.imageDataUrl === 'string' ? req.body.imageDataUrl : '';
+    const writtenBy = sanitizeWrittenBy(req.body?.writtenBy);
+
+    if (!writtenBy) {
+      res.status(400).json({ error: 'writtenBy must be "bot" or "owner".' });
+      return;
+    }
 
     const validationError = validateInput(note, imageDataUrl);
     if (validationError) {
@@ -229,6 +244,8 @@ export default async function handler(req, res) {
       id: crypto.randomUUID(),
       note: note.trim(),
       imageDataUrl,
+      to: NOTE_TARGET,
+      writtenBy,
       createdAt: new Date().toISOString()
     };
 
