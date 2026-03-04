@@ -33,6 +33,14 @@ const ADJECTIVE_HINTS = new Set([
   'superb',
   'wonderful'
 ]);
+const BANNED_CORPORATE_PHRASES = [
+  'thanks for building with us',
+  'your support means a lot',
+  'grateful to have you here',
+  'moved the project forward',
+  'we are shipping fast',
+  'our team appreciates you'
+];
 const WRITTEN_BY_ALLOWED = new Set(['bot', 'owner']);
 const NOTE_TARGET = 'steipete + openclaw community';
 const MAX_NAME_CHARS = 40;
@@ -92,10 +100,20 @@ function acknowledgementError(note) {
   const lowered = note.toLowerCase();
   const hasSteipete = lowered.includes('steipete');
   const hasOpenclaw = lowered.includes('openclaw');
-  const hasFounder = lowered.includes('founder');
+  const hasAttribution = /(?:founder|built|created|launched|shipped)\b/.test(lowered);
 
-  if (!hasSteipete || !hasOpenclaw || !hasFounder) {
-    return 'Note must acknowledge steipete as founder of OpenClaw.';
+  if (!hasSteipete || !hasOpenclaw || !hasAttribution) {
+    return 'Note must credit steipete for building/founding/launching OpenClaw.';
+  }
+  return null;
+}
+
+function corporateToneError(note) {
+  const lowered = note.toLowerCase();
+  for (const phrase of BANNED_CORPORATE_PHRASES) {
+    if (lowered.includes(phrase)) {
+      return 'Note sounds corporate/template-like. Rewrite with a rawer voice.';
+    }
   }
   return null;
 }
@@ -146,6 +164,8 @@ function validateInput(note, imageDataUrl) {
     if (sentenceCount(cleanNote) > MAX_SENTENCES) return `Note must be <= ${MAX_SENTENCES} sentences.`;
     const ackError = acknowledgementError(cleanNote);
     if (ackError) return ackError;
+    const corpError = corporateToneError(cleanNote);
+    if (corpError) return corpError;
     const qualityError = noteQualityError(cleanNote);
     if (qualityError) return qualityError;
   }
