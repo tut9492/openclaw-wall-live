@@ -88,6 +88,18 @@ function noteQualityError(note) {
   return null;
 }
 
+function acknowledgementError(note) {
+  const lowered = note.toLowerCase();
+  const hasSteipete = lowered.includes('steipete');
+  const hasOpenclaw = lowered.includes('openclaw');
+  const hasFounder = lowered.includes('founder');
+
+  if (!hasSteipete || !hasOpenclaw || !hasFounder) {
+    return 'Note must acknowledge steipete as founder of OpenClaw.';
+  }
+  return null;
+}
+
 function isNearDuplicateNote(note, existingNote) {
   const a = normalizeText(note);
   const b = normalizeText(existingNote || '');
@@ -132,6 +144,8 @@ function validateInput(note, imageDataUrl) {
   if (cleanNote) {
     if (cleanNote.length > MAX_NOTE_CHARS) return `Note must be <= ${MAX_NOTE_CHARS} characters.`;
     if (sentenceCount(cleanNote) > MAX_SENTENCES) return `Note must be <= ${MAX_SENTENCES} sentences.`;
+    const ackError = acknowledgementError(cleanNote);
+    if (ackError) return ackError;
     const qualityError = noteQualityError(cleanNote);
     if (qualityError) return qualityError;
   }
