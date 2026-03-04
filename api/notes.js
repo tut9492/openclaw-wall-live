@@ -164,6 +164,12 @@ async function checkRateLimit(ip) {
 }
 
 function safeParse(raw) {
+  if (raw && typeof raw === 'object') {
+    return raw;
+  }
+  if (typeof raw !== 'string') {
+    return null;
+  }
   try {
     return JSON.parse(raw);
   } catch {
