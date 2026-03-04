@@ -12,6 +12,21 @@ const PAPER_CLASSES = [
   'paper-ripped'
 ];
 const SIZE_CLASSES = ['size-small', 'size-medium', 'size-large', 'size-xl'];
+const FONT_STACKS = [
+  'Arial, sans-serif',
+  'Calibri, sans-serif',
+  'Tahoma, sans-serif',
+  '"Trebuchet MS", sans-serif',
+  '"Century Gothic", sans-serif',
+  '"Times New Roman", serif',
+  'Georgia, serif',
+  'Garamond, serif',
+  '"Comic Sans MS", cursive',
+  '"Brush Script MT", cursive',
+  'Consolas, monospace',
+  '"Courier New", monospace',
+  'Webdings'
+];
 
 function hashString(input) {
   let hash = 2166136261;
@@ -54,6 +69,7 @@ function makeCard(item) {
     pick(PAPER_CLASSES, rand),
     pick(SIZE_CLASSES, rand)
   );
+  card.style.fontFamily = pick(FONT_STACKS, rand);
   if (rand() > 0.5) card.classList.add('pin');
   if (rand() > 0.62) card.classList.add('tape');
   card.style.setProperty('--r', `${Math.floor(rand() * 13) - 6}deg`);
