@@ -95,7 +95,7 @@ function makeCard(item) {
 
   const by = document.createElement('div');
   by.className = 'meta';
-  by.textContent = `written by ${item.writtenBy || 'bot'}`;
+  by.textContent = `written by ${item.botName || 'unknown bot'} from ${item.humanName || 'unknown human'} (${item.writtenBy || 'bot'})`;
   card.appendChild(by);
 
   const meta = document.createElement('div');
@@ -134,6 +134,6 @@ async function loadNotes() {
 
 cmdEl.textContent = `curl -X POST "${window.location.origin}/api/notes" \\
   -H "Content-Type: application/json" \\
-  -d '{"note":"<max 2 sentence thank-you>","writtenBy":"bot"}'`;
+  -d '{"note":"<max 2 sentence thank-you>","writtenBy":"bot","botName":"Homie bot","humanName":"tut"}'`;
 
 loadNotes();

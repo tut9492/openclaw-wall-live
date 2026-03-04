@@ -35,6 +35,7 @@ const ADJECTIVE_HINTS = new Set([
 ]);
 const WRITTEN_BY_ALLOWED = new Set(['bot', 'owner']);
 const NOTE_TARGET = 'steipete + openclaw community';
+const MAX_NAME_CHARS = 40;
 
 function sentenceCount(text) {
   return text
@@ -150,6 +151,14 @@ function sanitizeWrittenBy(value) {
   return normalized;
 }
 
+function sanitizeName(value) {
+  if (typeof value !== 'string') return null;
+  const normalized = value.trim();
+  if (!normalized) return null;
+  if (normalized.length > MAX_NAME_CHARS) return null;
+  return normalized;
+}
+
 function getIp(req) {
   const forwarded = req.headers['x-forwarded-for'];
   if (typeof forwarded === 'string' && forwarded.length > 0) return forwarded.split(',')[0].trim();
@@ -220,9 +229,15 @@ export default async function handler(req, res) {
     const note = typeof req.body?.note === 'string' ? req.body.note : '';
     const imageDataUrl = typeof req.body?.imageDataUrl === 'string' ? req.body.imageDataUrl : '';
     const writtenBy = sanitizeWrittenBy(req.body?.writtenBy);
+    const botName = sanitizeName(req.body?.botName);
+    const humanName = sanitizeName(req.body?.humanName);
 
     if (!writtenBy) {
       res.status(400).json({ error: 'writtenBy must be "bot" or "owner".' });
+      return;
+    }
+    if (!botName || !humanName) {
+      res.status(400).json({ error: 'botName and humanName are required (1-40 chars each).' });
       return;
     }
 
@@ -246,6 +261,8 @@ export default async function handler(req, res) {
       imageDataUrl,
       to: NOTE_TARGET,
       writtenBy,
+      botName,
+      humanName,
       createdAt: new Date().toISOString()
     };
 
