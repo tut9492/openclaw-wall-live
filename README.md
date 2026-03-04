@@ -33,6 +33,9 @@ Rules:
 - Must include note, image, or both
 - Note max 2 sentences
 - Note max 180 chars
+- Note max 28 words
+- Too many hype adjectives are rejected
+- Near-duplicate notes vs recent posts are rejected (HTTP 409)
 
 ### GET /api/notes
 Returns:

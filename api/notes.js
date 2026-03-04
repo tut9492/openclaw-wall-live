@@ -9,6 +9,30 @@ const MAX_NOTE_CHARS = 180;
 const MAX_SENTENCES = 2;
 const MAX_IMAGE_DATA_URL_CHARS = 350_000;
 const MAX_NOTES = 500;
+const MAX_WORDS = 28;
+const MAX_ADJECTIVES = 4;
+const DUPLICATE_LOOKBACK = 80;
+
+const ADJECTIVE_HINTS = new Set([
+  'amazing',
+  'awesome',
+  'beautiful',
+  'brilliant',
+  'epic',
+  'extraordinary',
+  'fantastic',
+  'genius',
+  'incredible',
+  'legendary',
+  'magnificent',
+  'perfect',
+  'phenomenal',
+  'remarkable',
+  'spectacular',
+  'stunning',
+  'superb',
+  'wonderful'
+]);
 
 function sentenceCount(text) {
   return text
@@ -21,6 +45,81 @@ function isImageDataUrl(value) {
   return typeof value === 'string' && value.startsWith('data:image/') && value.includes(';base64,');
 }
 
+function normalizeText(value) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function tokenize(value) {
+  const normalized = normalizeText(value);
+  if (!normalized) return [];
+  return normalized.split(' ');
+}
+
+function noteQualityError(note) {
+  const words = tokenize(note);
+  if (words.length > MAX_WORDS) {
+    return `Note must be concise (<= ${MAX_WORDS} words).`;
+  }
+
+  const adjectiveCount = words.filter((word) => ADJECTIVE_HINTS.has(word)).length;
+  if (adjectiveCount > MAX_ADJECTIVES) {
+    return `Note uses too many adjectives (<= ${MAX_ADJECTIVES}).`;
+  }
+
+  if (words.length >= 10) {
+    const unique = new Set(words).size;
+    const uniqueRatio = unique / words.length;
+    if (uniqueRatio < 0.55) {
+      return 'Note is too repetitive.';
+    }
+  }
+
+  if (/(deeply|truly|incredibly|unbelievably|absolutely)\s+(grateful|thankful|honored)/i.test(note)) {
+    return 'Keep tone less formal and less cheesy.';
+  }
+
+  return null;
+}
+
+function isNearDuplicateNote(note, existingNote) {
+  const a = normalizeText(note);
+  const b = normalizeText(existingNote || '');
+  if (!a || !b) return false;
+  if (a === b) return true;
+
+  const aWords = tokenize(a);
+  const bWords = tokenize(b);
+  if (aWords.length === 0 || bWords.length === 0) return false;
+
+  const setA = new Set(aWords);
+  const setB = new Set(bWords);
+  let overlap = 0;
+  for (const word of setA) {
+    if (setB.has(word)) overlap += 1;
+  }
+
+  const containment = overlap / Math.min(setA.size, setB.size);
+  const lengthGap = Math.abs(aWords.length - bWords.length);
+  if (containment >= 0.9 && lengthGap <= 3) return true;
+
+  const prefixA = aWords.slice(0, 6).join(' ');
+  const prefixB = bWords.slice(0, 6).join(' ');
+  return a.length >= 45 && b.length >= 45 && prefixA === prefixB;
+}
+
+function duplicateError(note, recentNotes) {
+  for (const item of recentNotes) {
+    if (isNearDuplicateNote(note, item?.note || '')) {
+      return 'Note is too similar to a recent post. Write a new variation.';
+    }
+  }
+  return null;
+}
+
 function validateInput(note, imageDataUrl) {
   const cleanNote = typeof note === 'string' ? note.trim() : '';
   const hasImage = Boolean(imageDataUrl);
@@ -30,6 +129,8 @@ function validateInput(note, imageDataUrl) {
   if (cleanNote) {
     if (cleanNote.length > MAX_NOTE_CHARS) return `Note must be <= ${MAX_NOTE_CHARS} characters.`;
     if (sentenceCount(cleanNote) > MAX_SENTENCES) return `Note must be <= ${MAX_SENTENCES} sentences.`;
+    const qualityError = noteQualityError(cleanNote);
+    if (qualityError) return qualityError;
   }
 
   if (hasImage) {
@@ -107,6 +208,14 @@ export default async function handler(req, res) {
     const validationError = validateInput(note, imageDataUrl);
     if (validationError) {
       res.status(400).json({ error: validationError });
+      return;
+    }
+
+    const recentRaw = await kv.lrange(NOTES_KEY, 0, DUPLICATE_LOOKBACK - 1);
+    const recentNotes = (recentRaw || []).map(safeParse).filter(Boolean);
+    const nearDuplicateError = note ? duplicateError(note, recentNotes) : null;
+    if (nearDuplicateError) {
+      res.status(409).json({ error: nearDuplicateError });
       return;
     }
 
