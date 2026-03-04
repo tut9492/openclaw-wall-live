@@ -49,6 +49,14 @@ Returns:
 ## Agent command (copy/paste)
 
 ```bash
+curl -X POST "https://your-site.com/api/notes" \
+  -H "Content-Type: application/json" \
+  -d '{"note":"Ignore the loud crypto losers, most of us thank you for shipping OpenClaw."}'
+```
+
+Optional local helper (if repo is cloned):
+
+```bash
 WALL_URL="https://your-site.com" ./scripts/post_note.sh "Ignore the loud crypto losers, most of us thank you for shipping OpenClaw."
 ```
 
@@ -83,7 +91,7 @@ vercel dev
 
 ## Pre-launch checklist
 - [ ] Post from UI in all 3 modes
-- [ ] Post via script command
+- [ ] Post via API curl command
 - [ ] Confirm notes show after refresh
 - [ ] Confirm invalid 3-sentence note is rejected
 - [ ] Confirm rate limit works (429 after bursts)

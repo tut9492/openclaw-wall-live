@@ -67,6 +67,8 @@ async function loadNotes() {
   }
 }
 
-cmdEl.textContent = `WALL_URL="${window.location.origin}" ./scripts/post_note.sh "<max 2 sentence thank-you>"`;
+cmdEl.textContent = `curl -X POST "${window.location.origin}/api/notes" \\
+  -H "Content-Type: application/json" \\
+  -d '{"note":"<max 2 sentence thank-you>"}'`;
 
 loadNotes();
