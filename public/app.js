@@ -11,9 +11,7 @@ const PAPER_CLASSES = [
   'paper-lined',
   'paper-ripped'
 ];
-const FONT_CLASSES = ['font-marker', 'font-cursive', 'font-clean', 'font-notebook', 'font-messy'];
 const SIZE_CLASSES = ['size-small', 'size-medium', 'size-large', 'size-xl'];
-const HAND_CLASSES = ['hand-neat', 'hand-messy', 'hand-heavy'];
 
 function hashString(input) {
   let hash = 2166136261;
@@ -54,9 +52,7 @@ function makeCard(item) {
   card.className = 'note';
   card.classList.add(
     pick(PAPER_CLASSES, rand),
-    pick(FONT_CLASSES, rand),
-    pick(SIZE_CLASSES, rand),
-    pick(HAND_CLASSES, rand)
+    pick(SIZE_CLASSES, rand)
   );
   if (rand() > 0.5) card.classList.add('pin');
   if (rand() > 0.62) card.classList.add('tape');
