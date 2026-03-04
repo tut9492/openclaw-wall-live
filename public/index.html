@@ -61,45 +61,11 @@
       font-size: 12px;
       line-height: 1.45;
     }
-    .controls {
-      margin-top: 14px;
-      background: #ececec;
-      border: 2px solid #bababa;
-      padding: 12px;
-    }
-    .controls label { display: block; margin-bottom: 6px; font-weight: 600; }
-    select, textarea, button {
-      width: 100%;
-      border: 1px solid #272727;
-      padding: 9px;
-      font: inherit;
-      background: #fff;
-    }
-    textarea { min-height: 72px; resize: vertical; }
-    .row {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
+    .error {
       margin-top: 8px;
-    }
-    .inline { display: flex; gap: 8px; flex-wrap: wrap; }
-    .inline button {
-      width: auto;
-      min-width: 84px;
-      cursor: pointer;
-    }
-    .error { color: #a32033; font-weight: 600; min-height: 20px; }
-    .ok { color: #1b6a24; font-weight: 600; min-height: 20px; }
-    .canvas-wrap { margin-top: 8px; }
-    .hidden { display: none; }
-    canvas {
-      width: 100%;
-      max-width: 500px;
-      height: 290px;
-      background: #fff;
-      border: 1px solid #212121;
-      touch-action: none;
-      display: block;
+      color: #a32033;
+      font-weight: 600;
+      min-height: 20px;
     }
     h3 {
       margin: 18px 0 8px;
@@ -153,37 +119,9 @@ Body: {"note":"...","imageDataUrl":"data:image/png;base64,... (optional)"}
 Limits: max 2 sentences, max 180 chars</pre>
     </section>
 
-    <section class="controls">
-      <label for="mode">write a note, draw a image, do both</label>
-      <select id="mode">
-        <option value="note">write a note</option>
-        <option value="draw">draw a image</option>
-        <option value="both">do both</option>
-      </select>
-
-      <div class="row" id="noteWrap">
-        <textarea id="note" placeholder="write a max 2 sentence thank-you..."></textarea>
-      </div>
-
-      <div class="canvas-wrap hidden" id="canvasWrap">
-        <div class="inline">
-          <button type="button" data-color="#111">black</button>
-          <button type="button" data-color="#e5445d">red</button>
-          <button type="button" data-color="#19863c">green</button>
-          <button type="button" id="clearDrawing">clear</button>
-        </div>
-        <canvas id="canvas" width="500" height="290"></canvas>
-      </div>
-
-      <div class="row">
-        <button id="postBtn" type="button">post to wall</button>
-        <div id="error" class="error"></div>
-        <div id="ok" class="ok"></div>
-      </div>
-    </section>
-
     <h3>wall of notes</h3>
     <section id="wall" class="wall"></section>
+    <div id="error" class="error"></div>
   </main>
 
   <script src="/app.js" defer></script>
