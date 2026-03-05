@@ -96,11 +96,9 @@
     }
     .note {
       aspect-ratio: 1 / 1;
-      padding: 18% 12px 12px;
+      padding: 12px;
       border: 1px solid rgba(0,0,0,0.18);
-      box-shadow:
-        0 4px 8px rgba(0,0,0,0.28),
-        inset 0 -10px 12px rgba(0,0,0,0.1);
+      box-shadow: none;
       transform: rotate(var(--r));
       display: flex;
       flex-direction: column;
@@ -110,29 +108,6 @@
       position: relative;
       overflow: hidden;
       color: var(--ink, #111);
-    }
-    .note::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 16.6667%;
-      pointer-events: none;
-      background: linear-gradient(to bottom, var(--adhesive-top), var(--adhesive-bottom));
-      opacity: 1;
-      border-bottom: 1px solid rgba(0,0,0,0.18);
-    }
-    .note::after {
-      content: "";
-      position: absolute;
-      left: 10%;
-      right: 10%;
-      bottom: -7px;
-      height: 14px;
-      border-radius: 50%;
-      background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.08) 55%, rgba(0,0,0,0) 100%);
-      pointer-events: none;
     }
     .note-text {
       line-height: 1.2;
@@ -145,13 +120,13 @@
       letter-spacing: 0.5px;
       font-family: inherit;
     }
-    .paper-white { background: #ffffff; --adhesive-top: #f4f4f4; --adhesive-bottom: #e7e7e7; --ink: #111; }
-    .paper-pink { background: #ff9ecf; --adhesive-top: #f784bf; --adhesive-bottom: #ee6ab0; --ink: #1b0820; }
-    .paper-purple { background: #c793ff; --adhesive-top: #b67cf9; --adhesive-bottom: #a869ee; --ink: #18062a; }
-    .paper-orange { background: #ffb347; --adhesive-top: #f6a538; --adhesive-bottom: #ec9527; --ink: #2a1304; }
-    .paper-yellow { background: #fff66b; --adhesive-top: #f3ea58; --adhesive-bottom: #e9df46; --ink: #241f03; }
-    .paper-black { background: #171717; --adhesive-top: #2a2a2a; --adhesive-bottom: #222222; --ink: #f4f4f4; }
-    .paper-blue { background: #6ec5ff; --adhesive-top: #59b8f6; --adhesive-bottom: #43a8ea; --ink: #061a2c; }
+    .paper-white { background: #ffffff; --ink: #111; }
+    .paper-pink { background: #ff9ecf; --ink: #1b0820; }
+    .paper-purple { background: #c793ff; --ink: #18062a; }
+    .paper-orange { background: #ffb347; --ink: #2a1304; }
+    .paper-yellow { background: #fff66b; --ink: #241f03; }
+    .paper-black { background: #171717; --ink: #f4f4f4; }
+    .paper-blue { background: #6ec5ff; --ink: #061a2c; }
     .size-small .note-text { font-size: 15px; }
     .size-medium .note-text { font-size: 19px; }
     .size-large .note-text { font-size: 25px; }
