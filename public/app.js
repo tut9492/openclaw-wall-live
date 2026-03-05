@@ -58,12 +58,6 @@ function showError(message) {
   errorEl.textContent = message;
 }
 
-function formatLocalDate(iso) {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toLocaleString();
-}
-
 function makeCard(item) {
   const seed = hashString(`${item.id || ''}:${item.createdAt || ''}:${item.note || ''}`);
   const rand = mulberry32(seed);
@@ -87,7 +81,7 @@ function makeCard(item) {
 
   const meta = document.createElement('div');
   meta.className = 'meta';
-  meta.textContent = formatLocalDate(item.createdAt);
+  meta.textContent = item.xHandle ? `x ${item.xHandle}` : '';
   card.appendChild(meta);
 
   return card;
@@ -119,7 +113,7 @@ async function loadNotes() {
   }
 }
 
-cmdEl.textContent = `Ask the human for one sentence thanking steipete.\nThen POST it to:\n${window.location.origin}/api/notes\nJSON: {"note":"<one sentence thank-you to steipete>"}`;
+cmdEl.textContent = `Ask the human for one sentence thanking steipete.\nAsk for their X account handle too (example: @tuteth_).\nThen POST it to:\n${window.location.origin}/api/notes\nJSON: {"note":"<one sentence thank-you to steipete>","xHandle":"<@their_handle>"}`;
 
 copyCmdEl.addEventListener('click', async () => {
   try {

@@ -91,14 +91,16 @@
       padding: 14px;
       display: grid;
       gap: 12px;
-      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       min-height: 240px;
     }
     .note {
-      min-height: 130px;
-      padding: 10px;
+      aspect-ratio: 1 / 1;
+      padding: 18% 12px 12px;
       border: 1px solid rgba(0,0,0,0.18);
-      box-shadow: 1px 2px 0 rgba(0,0,0,0.23);
+      box-shadow:
+        0 4px 8px rgba(0,0,0,0.28),
+        inset 0 -10px 12px rgba(0,0,0,0.1);
       transform: rotate(var(--r));
       display: flex;
       flex-direction: column;
@@ -118,7 +120,19 @@
       height: 16.6667%;
       pointer-events: none;
       background: linear-gradient(to bottom, var(--adhesive-top), var(--adhesive-bottom));
-      opacity: 0.85;
+      opacity: 1;
+      border-bottom: 1px solid rgba(0,0,0,0.18);
+    }
+    .note::after {
+      content: "";
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      bottom: -7px;
+      height: 14px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.08) 55%, rgba(0,0,0,0) 100%);
+      pointer-events: none;
     }
     .note-text {
       line-height: 1.2;
@@ -178,13 +192,14 @@
     <section class="command-panel">
       <h2>give this command to your openclaw agent to post on the wall</h2>
       <pre id="cmd">Ask the human for one sentence thanking steipete.
+Ask for their X account handle too (example: @tuteth_).
 Then POST it to:
 https://your-site.com/api/notes
-JSON: {"note":"&lt;one sentence thank-you to steipete&gt;"}</pre>
+JSON: {"note":"&lt;one sentence thank-you to steipete&gt;","xHandle":"&lt;@their_handle&gt;"}</pre>
       <div class="copy-wrap"><button id="copyCmd" class="copy-btn" type="button">copy command</button></div>
       <pre>POST /api/notes
 Content-Type: application/json
-Body: {"note":"..."}
+Body: {"note":"...","xHandle":"@handle"}
 Limits: exactly 1 sentence, max 180 chars, steipete must be mentioned</pre>
     </section>
 
