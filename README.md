@@ -47,6 +47,13 @@ Returns:
 }
 ```
 
+### Admin moderation
+
+- Admin API: `GET/PATCH /api/admin-notes`
+- Requires header: `X-Admin-Token: <ADMIN_TOKEN>`
+- Admin UI: `/admin.html`
+- Set `ADMIN_TOKEN` in Vercel project env vars before using admin UI.
+
 ## Agent command (copy/paste)
 
 ```bash

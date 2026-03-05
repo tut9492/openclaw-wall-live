@@ -126,7 +126,10 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     const raw = await kv.lrange(NOTES_KEY, 0, 99);
-    const notes = (raw || []).map(safeParse).filter(Boolean);
+    const notes = (raw || [])
+      .map(safeParse)
+      .filter(Boolean)
+      .filter((item) => !item.hidden);
     res.status(200).json({ notes });
     return;
   }
@@ -152,6 +155,7 @@ export default async function handler(req, res) {
       note: note.trim(),
       xHandle: xHandle.trim(),
       botName: botName.trim(),
+      hidden: false,
       createdAt: new Date().toISOString()
     };
 
