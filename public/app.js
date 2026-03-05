@@ -2,6 +2,8 @@ const wallEl = document.getElementById('wall');
 const cmdEl = document.getElementById('cmd');
 const errorEl = document.getElementById('error');
 const copyCmdEl = document.getElementById('copyCmd');
+const titleEl = document.querySelector('h1');
+const TITLE_COLORS = ['#ff3b30', '#0a84ff', '#34c759'];
 
 const PAPER_CLASSES = [
   'paper-white',
@@ -52,6 +54,21 @@ function mulberry32(seed) {
 
 function pick(list, rand) {
   return list[Math.floor(rand() * list.length)];
+}
+
+function colorizeTitle() {
+  if (!titleEl) return;
+  const parts = titleEl.textContent
+    .split(/\s+/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const html = parts
+    .map((word) => {
+      const color = TITLE_COLORS[Math.floor(Math.random() * TITLE_COLORS.length)];
+      return `<span class="title-word" style="color:${color}">${word}</span>`;
+    })
+    .join(' ');
+  titleEl.innerHTML = html;
 }
 
 function showError(message) {
@@ -128,3 +145,4 @@ copyCmdEl.addEventListener('click', async () => {
 });
 
 loadNotes();
+colorizeTitle();
