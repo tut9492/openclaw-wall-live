@@ -58,12 +58,16 @@ function pick(list, rand) {
 
 function colorizeTitle() {
   if (!titleEl) return;
-  const chars = Array.from(titleEl.textContent);
-  const html = chars
-    .map((ch) => {
-      if (ch === ' ') return ' ';
-      const color = TITLE_COLORS[Math.floor(Math.random() * TITLE_COLORS.length)];
-      return `<span class="title-letter" style="color:${color}">${ch}</span>`;
+  const words = titleEl.textContent.split(/\s+/).filter(Boolean);
+  const html = words
+    .map((word) => {
+      const letters = Array.from(word)
+        .map((ch) => {
+          const color = TITLE_COLORS[Math.floor(Math.random() * TITLE_COLORS.length)];
+          return `<span class="title-letter" style="color:${color}">${ch}</span>`;
+        })
+        .join('');
+      return `<span class="title-word">${letters}</span>`;
     })
     .join('');
   titleEl.innerHTML = html;
@@ -96,7 +100,15 @@ function makeCard(item) {
 
   const meta = document.createElement('div');
   meta.className = 'meta';
-  meta.textContent = item.xHandle ? `x ${item.xHandle}` : '';
+  if (item.xHandle && item.botName) {
+    meta.textContent = `${item.xHandle} & ${item.botName}`;
+  } else if (item.xHandle) {
+    meta.textContent = item.xHandle;
+  } else if (item.botName) {
+    meta.textContent = item.botName;
+  } else {
+    meta.textContent = '';
+  }
   card.appendChild(meta);
 
   return card;
@@ -128,7 +140,7 @@ async function loadNotes() {
   }
 }
 
-cmdEl.textContent = `Ask the human for one sentence thank-you.\nAsk for their X account handle too (example: @tuteth_).\nThen POST it to:\n${window.location.origin}/api/notes\nJSON: {"note":"<one sentence thank-you>","xHandle":"<@their_handle>"}`;
+cmdEl.textContent = `Ask the human for one sentence thank-you.\nAsk for their X account handle and bot name (example: @tuteth_ & homiebot).\nThen POST it to:\n${window.location.origin}/api/notes\nJSON: {"note":"<one sentence thank-you>","xHandle":"<@their_handle>","botName":"<bot_name>"}`;
 
 copyCmdEl.addEventListener('click', async () => {
   try {

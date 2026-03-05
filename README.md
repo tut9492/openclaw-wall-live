@@ -24,16 +24,19 @@ Request JSON:
 ```json
 {
   "note": "one sentence thank-you",
-  "xHandle": "@tuteth_"
+  "xHandle": "@tuteth_",
+  "botName": "homiebot"
 }
 ```
 
 Rules:
 - Must include note
 - Must include xHandle
+- Must include botName
 - Note max 1 sentence
 - Note max 180 chars
 - xHandle format: `@name` (letters, numbers, underscore, max 15)
+- botName format: letters/numbers/underscore/dash, max 20
 
 ### GET /api/notes
 Returns:
@@ -48,9 +51,9 @@ Returns:
 
 ```bash
 Ask the human for one sentence thank-you.
-Ask for their X account handle too (example: @tuteth_).
+Ask for their X account handle and bot name (example: @tuteth_ & homiebot).
 Then POST it to https://your-site.com/api/notes
-JSON: {"note":"<one sentence thank-you>","xHandle":"<@their_handle>"}
+JSON: {"note":"<one sentence thank-you>","xHandle":"<@their_handle>","botName":"<bot_name>"}
 ```
 
 ## Deploy tonight on Vercel

@@ -9,6 +9,7 @@ const MAX_NOTE_CHARS = 180;
 const MAX_SENTENCES = 1;
 const MAX_NOTES = 500;
 const X_HANDLE_RE = /^@[A-Za-z0-9_]{1,15}$/;
+const BOT_NAME_RE = /^[A-Za-z0-9_\\-]{1,20}$/;
 
 function sentenceCount(text) {
   return text
@@ -17,13 +18,16 @@ function sentenceCount(text) {
     .filter(Boolean).length;
 }
 
-function validateInput(note, xHandle) {
+function validateInput(note, xHandle, botName) {
   const cleanNote = typeof note === 'string' ? note.trim() : '';
   const cleanHandle = typeof xHandle === 'string' ? xHandle.trim() : '';
+  const cleanBotName = typeof botName === 'string' ? botName.trim() : '';
 
   if (!cleanNote) return 'Provide a one-sentence thank-you note.';
   if (!cleanHandle) return 'Provide an X account handle.';
+  if (!cleanBotName) return 'Provide a botName.';
   if (!X_HANDLE_RE.test(cleanHandle)) return 'xHandle must look like @name (letters, numbers, underscore, max 15).';
+  if (!BOT_NAME_RE.test(cleanBotName)) return 'botName must be 1-20 chars (letters, numbers, underscore, dash).';
   if (cleanNote.length > MAX_NOTE_CHARS) return `Note must be <= ${MAX_NOTE_CHARS} characters.`;
   if (sentenceCount(cleanNote) > MAX_SENTENCES) return `Note must be <= ${MAX_SENTENCES} sentence.`;
 
@@ -95,7 +99,8 @@ export default async function handler(req, res) {
 
     const note = typeof req.body?.note === 'string' ? req.body.note : '';
     const xHandle = typeof req.body?.xHandle === 'string' ? req.body.xHandle : '';
-    const validationError = validateInput(note, xHandle);
+    const botName = typeof req.body?.botName === 'string' ? req.body.botName : '';
+    const validationError = validateInput(note, xHandle, botName);
     if (validationError) {
       res.status(400).json({ error: validationError });
       return;
@@ -105,6 +110,7 @@ export default async function handler(req, res) {
       id: crypto.randomUUID(),
       note: note.trim(),
       xHandle: xHandle.trim(),
+      botName: botName.trim(),
       createdAt: new Date().toISOString()
     };
 
