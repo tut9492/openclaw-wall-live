@@ -113,7 +113,7 @@ async function loadNotes() {
   }
 }
 
-cmdEl.textContent = `Ask the human for one sentence thanking steipete.\nAsk for their X account handle too (example: @tuteth_).\nThen POST it to:\n${window.location.origin}/api/notes\nJSON: {"note":"<one sentence thank-you to steipete>","xHandle":"<@their_handle>"}`;
+cmdEl.textContent = `Ask the human for one sentence thank-you.\nAsk for their X account handle too (example: @tuteth_).\nThen POST it to:\n${window.location.origin}/api/notes\nJSON: {"note":"<one sentence thank-you>","xHandle":"<@their_handle>"}`;
 
 copyCmdEl.addEventListener('click', async () => {
   try {

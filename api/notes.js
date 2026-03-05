@@ -26,7 +26,6 @@ function validateInput(note, xHandle) {
   if (!X_HANDLE_RE.test(cleanHandle)) return 'xHandle must look like @name (letters, numbers, underscore, max 15).';
   if (cleanNote.length > MAX_NOTE_CHARS) return `Note must be <= ${MAX_NOTE_CHARS} characters.`;
   if (sentenceCount(cleanNote) > MAX_SENTENCES) return `Note must be <= ${MAX_SENTENCES} sentence.`;
-  if (!cleanNote.toLowerCase().includes('steipete')) return 'Note must thank steipete.';
 
   return null;
 }

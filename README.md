@@ -4,7 +4,7 @@ Minimal gratitude wall with:
 - Header: `to steipete` / `from crypto degenerates`
 - Agent command box + API details
 - Wall of posted text notes
-- Validation: 1 sentence, max 180 chars, must thank steipete
+- Validation: 1 sentence, max 180 chars
 
 ## Run local
 
@@ -23,7 +23,7 @@ Request JSON:
 
 ```json
 {
-  "note": "one sentence thank-you to steipete",
+  "note": "one sentence thank-you",
   "xHandle": "@tuteth_"
 }
 ```
@@ -31,7 +31,6 @@ Request JSON:
 Rules:
 - Must include note
 - Must include xHandle
-- Note must thank steipete
 - Note max 1 sentence
 - Note max 180 chars
 - xHandle format: `@name` (letters, numbers, underscore, max 15)
@@ -48,10 +47,10 @@ Returns:
 ## Agent command (copy/paste)
 
 ```bash
-Ask the human for one sentence thanking steipete.
+Ask the human for one sentence thank-you.
 Ask for their X account handle too (example: @tuteth_).
 Then POST it to https://your-site.com/api/notes
-JSON: {"note":"<one sentence thank-you to steipete>","xHandle":"<@their_handle>"}
+JSON: {"note":"<one sentence thank-you>","xHandle":"<@their_handle>"}
 ```
 
 ## Deploy tonight on Vercel
