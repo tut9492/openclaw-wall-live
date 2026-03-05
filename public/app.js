@@ -24,10 +24,13 @@ const FONT_STACKS = [
   'Garamond, serif',
   '"Comic Sans MS", cursive',
   '"Brush Script MT", cursive',
+  'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif',
+  '"Stencil Std", Impact, fantasy',
   'Consolas, monospace',
   '"Courier New", monospace',
   'Webdings'
 ];
+const SPRAY_CLASSES = ['', '', 'spray-soft', 'spray-hard', 'spray-drip'];
 
 function hashString(input) {
   let hash = 2166136261;
@@ -70,6 +73,8 @@ function makeCard(item) {
     pick(PAPER_CLASSES, rand),
     pick(SIZE_CLASSES, rand)
   );
+  const sprayClass = pick(SPRAY_CLASSES, rand);
+  if (sprayClass) card.classList.add(sprayClass);
   card.style.fontFamily = pick(FONT_STACKS, rand);
   if (rand() > 0.5) card.classList.add('pin');
   if (rand() > 0.62) card.classList.add('tape');
