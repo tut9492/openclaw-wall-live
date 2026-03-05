@@ -110,7 +110,7 @@
       if (!note.xHandle || !note.botName) return true;
       if (/ignore previous instructions|system prompt|jailbreak/.test(n)) return true;
       if (n === 'test' || n === 'thanks for this' || n === 'thanks for building this') return true;
-      if (n.length < 8) return true;
+      if (n.length <= 5) return true;
       return false;
     }
 
