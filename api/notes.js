@@ -8,7 +8,6 @@ const RATE_WINDOW_SECONDS = 60;
 const MAX_NOTE_CHARS = 180;
 const MAX_SENTENCES = 1;
 const MAX_NOTES = 500;
-const NOTE_TARGET = 'steipete + openclaw community';
 
 function sentenceCount(text) {
   return text
@@ -101,7 +100,6 @@ export default async function handler(req, res) {
     const entry = {
       id: crypto.randomUUID(),
       note: note.trim(),
-      to: NOTE_TARGET,
       createdAt: new Date().toISOString()
     };
 

@@ -87,11 +87,6 @@ function makeCard(item) {
     card.appendChild(text);
   }
 
-  const target = document.createElement('div');
-  target.className = 'meta';
-  target.textContent = `to ${item.to || 'steipete + openclaw community'}`;
-  card.appendChild(target);
-
   const meta = document.createElement('div');
   meta.className = 'meta';
   meta.textContent = formatLocalDate(item.createdAt);
