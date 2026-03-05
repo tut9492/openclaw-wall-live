@@ -7,7 +7,6 @@ const RATE_WINDOW_SECONDS = 60;
 
 const MAX_NOTE_CHARS = 180;
 const MAX_SENTENCES = 1;
-const MAX_IMAGE_DATA_URL_CHARS = 350_000;
 const MAX_NOTES = 500;
 const NOTE_TARGET = 'steipete + openclaw community';
 
@@ -18,22 +17,13 @@ function sentenceCount(text) {
     .filter(Boolean).length;
 }
 
-function isImageDataUrl(value) {
-  return typeof value === 'string' && value.startsWith('data:image/') && value.includes(';base64,');
-}
-
-function validateInput(note, imageDataUrl) {
+function validateInput(note) {
   const cleanNote = typeof note === 'string' ? note.trim() : '';
-  const cleanImage = typeof imageDataUrl === 'string' ? imageDataUrl.trim() : '';
 
   if (!cleanNote) return 'Provide a one-sentence thank-you note.';
-  if (!cleanImage) return 'Provide an MS-paint-style image (imageDataUrl).';
   if (cleanNote.length > MAX_NOTE_CHARS) return `Note must be <= ${MAX_NOTE_CHARS} characters.`;
   if (sentenceCount(cleanNote) > MAX_SENTENCES) return `Note must be <= ${MAX_SENTENCES} sentence.`;
   if (!cleanNote.toLowerCase().includes('steipete')) return 'Note must thank steipete.';
-
-  if (!isImageDataUrl(cleanImage)) return 'Image must be a data URL from canvas.';
-  if (cleanImage.length > MAX_IMAGE_DATA_URL_CHARS) return 'Image is too large.';
 
   return null;
 }
@@ -102,9 +92,7 @@ export default async function handler(req, res) {
     }
 
     const note = typeof req.body?.note === 'string' ? req.body.note : '';
-    const imageDataUrl = typeof req.body?.imageDataUrl === 'string' ? req.body.imageDataUrl : '';
-
-    const validationError = validateInput(note, imageDataUrl);
+    const validationError = validateInput(note);
     if (validationError) {
       res.status(400).json({ error: validationError });
       return;
@@ -113,7 +101,6 @@ export default async function handler(req, res) {
     const entry = {
       id: crypto.randomUUID(),
       note: note.trim(),
-      imageDataUrl: imageDataUrl.trim(),
       to: NOTE_TARGET,
       createdAt: new Date().toISOString()
     };

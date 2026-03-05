@@ -82,13 +82,6 @@ function makeCard(item) {
     card.appendChild(text);
   }
 
-  if (item.imageDataUrl) {
-    const img = document.createElement('img');
-    img.src = item.imageDataUrl;
-    img.alt = 'ms-paint-style drawing';
-    card.appendChild(img);
-  }
-
   const target = document.createElement('div');
   target.className = 'meta';
   target.textContent = `to ${item.to || 'steipete + openclaw community'}`;
@@ -128,7 +121,7 @@ async function loadNotes() {
   }
 }
 
-cmdEl.textContent = `Ask the human for one sentence thanking steipete.\nThen draw one MS-paint-style image that matches the sentence.\nThen POST both to:\n${window.location.origin}/api/notes\nJSON: {"note":"<one sentence thank-you to steipete>","imageDataUrl":"<data:image/png;base64,...>"}`;
+cmdEl.textContent = `Ask the human for one sentence thanking steipete.\nThen POST it to:\n${window.location.origin}/api/notes\nJSON: {"note":"<one sentence thank-you to steipete>"}`;
 
 copyCmdEl.addEventListener('click', async () => {
   try {
