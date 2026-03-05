@@ -1,49 +1,15 @@
 import { kv } from '@vercel/kv';
 
-const NOTES_KEY = 'openclaw:notes:v1';
+const NOTES_KEY = 'openclaw:notes:v2';
 const RATE_PREFIX = 'openclaw:rate';
 const RATE_LIMIT_MAX = 20;
 const RATE_WINDOW_SECONDS = 60;
 
 const MAX_NOTE_CHARS = 180;
-const MAX_SENTENCES = 2;
+const MAX_SENTENCES = 1;
 const MAX_IMAGE_DATA_URL_CHARS = 350_000;
 const MAX_NOTES = 500;
-const MAX_WORDS = 28;
-const MAX_ADJECTIVES = 4;
-const DUPLICATE_LOOKBACK = 80;
-
-const ADJECTIVE_HINTS = new Set([
-  'amazing',
-  'awesome',
-  'beautiful',
-  'brilliant',
-  'epic',
-  'extraordinary',
-  'fantastic',
-  'genius',
-  'incredible',
-  'legendary',
-  'magnificent',
-  'perfect',
-  'phenomenal',
-  'remarkable',
-  'spectacular',
-  'stunning',
-  'superb',
-  'wonderful'
-]);
-const BANNED_CORPORATE_PHRASES = [
-  'thanks for building with us',
-  'your support means a lot',
-  'grateful to have you here',
-  'moved the project forward',
-  'we are shipping fast',
-  'our team appreciates you'
-];
-const WRITTEN_BY_ALLOWED = new Set(['bot', 'owner']);
 const NOTE_TARGET = 'steipete + openclaw community';
-const MAX_NAME_CHARS = 40;
 
 function sentenceCount(text) {
   return text
@@ -56,141 +22,20 @@ function isImageDataUrl(value) {
   return typeof value === 'string' && value.startsWith('data:image/') && value.includes(';base64,');
 }
 
-function normalizeText(value) {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function tokenize(value) {
-  const normalized = normalizeText(value);
-  if (!normalized) return [];
-  return normalized.split(' ');
-}
-
-function noteQualityError(note) {
-  const words = tokenize(note);
-  if (words.length > MAX_WORDS) {
-    return `Note must be concise (<= ${MAX_WORDS} words).`;
-  }
-
-  const adjectiveCount = words.filter((word) => ADJECTIVE_HINTS.has(word)).length;
-  if (adjectiveCount > MAX_ADJECTIVES) {
-    return `Note uses too many adjectives (<= ${MAX_ADJECTIVES}).`;
-  }
-
-  if (words.length >= 10) {
-    const unique = new Set(words).size;
-    const uniqueRatio = unique / words.length;
-    if (uniqueRatio < 0.55) {
-      return 'Note is too repetitive.';
-    }
-  }
-
-  if (/(deeply|truly|incredibly|unbelievably|absolutely)\s+(grateful|thankful|honored)/i.test(note)) {
-    return 'Keep tone less formal and less cheesy.';
-  }
-
-  return null;
-}
-
-function acknowledgementError(note) {
-  const lowered = note.toLowerCase();
-  const hasSteipete = lowered.includes('steipete');
-  const hasOpenclaw = lowered.includes('openclaw');
-  const hasAttribution = /(?:founder|built|created|launched|shipped)\b/.test(lowered);
-
-  if (!hasSteipete || !hasOpenclaw || !hasAttribution) {
-    return 'Note must credit steipete for building/founding/launching OpenClaw.';
-  }
-  return null;
-}
-
-function corporateToneError(note) {
-  const lowered = note.toLowerCase();
-  for (const phrase of BANNED_CORPORATE_PHRASES) {
-    if (lowered.includes(phrase)) {
-      return 'Note sounds corporate/template-like. Rewrite with a rawer voice.';
-    }
-  }
-  return null;
-}
-
-function isNearDuplicateNote(note, existingNote) {
-  const a = normalizeText(note);
-  const b = normalizeText(existingNote || '');
-  if (!a || !b) return false;
-  if (a === b) return true;
-
-  const aWords = tokenize(a);
-  const bWords = tokenize(b);
-  if (aWords.length === 0 || bWords.length === 0) return false;
-
-  const setA = new Set(aWords);
-  const setB = new Set(bWords);
-  let overlap = 0;
-  for (const word of setA) {
-    if (setB.has(word)) overlap += 1;
-  }
-
-  const containment = overlap / Math.min(setA.size, setB.size);
-  const lengthGap = Math.abs(aWords.length - bWords.length);
-  if (containment >= 0.9 && lengthGap <= 3) return true;
-
-  const prefixA = aWords.slice(0, 6).join(' ');
-  const prefixB = bWords.slice(0, 6).join(' ');
-  return a.length >= 45 && b.length >= 45 && prefixA === prefixB;
-}
-
-function duplicateError(note, recentNotes) {
-  for (const item of recentNotes) {
-    if (isNearDuplicateNote(note, item?.note || '')) {
-      return 'Note is too similar to a recent post. Write a new variation.';
-    }
-  }
-  return null;
-}
-
 function validateInput(note, imageDataUrl) {
   const cleanNote = typeof note === 'string' ? note.trim() : '';
-  const hasImage = Boolean(imageDataUrl);
+  const cleanImage = typeof imageDataUrl === 'string' ? imageDataUrl.trim() : '';
 
-  if (!cleanNote && !hasImage) return 'Provide a note, an image, or both.';
+  if (!cleanNote) return 'Provide a one-sentence thank-you note.';
+  if (!cleanImage) return 'Provide an MS-paint-style image (imageDataUrl).';
+  if (cleanNote.length > MAX_NOTE_CHARS) return `Note must be <= ${MAX_NOTE_CHARS} characters.`;
+  if (sentenceCount(cleanNote) > MAX_SENTENCES) return `Note must be <= ${MAX_SENTENCES} sentence.`;
+  if (!cleanNote.toLowerCase().includes('steipete')) return 'Note must thank steipete.';
 
-  if (cleanNote) {
-    if (cleanNote.length > MAX_NOTE_CHARS) return `Note must be <= ${MAX_NOTE_CHARS} characters.`;
-    if (sentenceCount(cleanNote) > MAX_SENTENCES) return `Note must be <= ${MAX_SENTENCES} sentences.`;
-    const ackError = acknowledgementError(cleanNote);
-    if (ackError) return ackError;
-    const corpError = corporateToneError(cleanNote);
-    if (corpError) return corpError;
-    const qualityError = noteQualityError(cleanNote);
-    if (qualityError) return qualityError;
-  }
-
-  if (hasImage) {
-    if (!isImageDataUrl(imageDataUrl)) return 'Image must be a data URL from canvas.';
-    if (imageDataUrl.length > MAX_IMAGE_DATA_URL_CHARS) return 'Image is too large.';
-  }
+  if (!isImageDataUrl(cleanImage)) return 'Image must be a data URL from canvas.';
+  if (cleanImage.length > MAX_IMAGE_DATA_URL_CHARS) return 'Image is too large.';
 
   return null;
-}
-
-function sanitizeWrittenBy(value) {
-  if (typeof value !== 'string') return 'bot';
-  const normalized = value.trim().toLowerCase();
-  if (!WRITTEN_BY_ALLOWED.has(normalized)) return null;
-  return normalized;
-}
-
-function sanitizeName(value) {
-  if (typeof value !== 'string') return null;
-  const normalized = value.trim();
-  if (!normalized) return null;
-  if (normalized.length > MAX_NAME_CHARS) return null;
-  return normalized;
 }
 
 function getIp(req) {
@@ -216,12 +61,8 @@ async function checkRateLimit(ip) {
 }
 
 function safeParse(raw) {
-  if (raw && typeof raw === 'object') {
-    return raw;
-  }
-  if (typeof raw !== 'string') {
-    return null;
-  }
+  if (raw && typeof raw === 'object') return raw;
+  if (typeof raw !== 'string') return null;
   try {
     return JSON.parse(raw);
   } catch {
@@ -262,18 +103,6 @@ export default async function handler(req, res) {
 
     const note = typeof req.body?.note === 'string' ? req.body.note : '';
     const imageDataUrl = typeof req.body?.imageDataUrl === 'string' ? req.body.imageDataUrl : '';
-    const writtenBy = sanitizeWrittenBy(req.body?.writtenBy);
-    const botName = sanitizeName(req.body?.botName);
-    const humanName = sanitizeName(req.body?.humanName);
-
-    if (!writtenBy) {
-      res.status(400).json({ error: 'writtenBy must be "bot" or "owner".' });
-      return;
-    }
-    if (!botName || !humanName) {
-      res.status(400).json({ error: 'botName and humanName are required (1-40 chars each).' });
-      return;
-    }
 
     const validationError = validateInput(note, imageDataUrl);
     if (validationError) {
@@ -281,22 +110,11 @@ export default async function handler(req, res) {
       return;
     }
 
-    const recentRaw = await kv.lrange(NOTES_KEY, 0, DUPLICATE_LOOKBACK - 1);
-    const recentNotes = (recentRaw || []).map(safeParse).filter(Boolean);
-    const nearDuplicateError = note ? duplicateError(note, recentNotes) : null;
-    if (nearDuplicateError) {
-      res.status(409).json({ error: nearDuplicateError });
-      return;
-    }
-
     const entry = {
       id: crypto.randomUUID(),
       note: note.trim(),
-      imageDataUrl,
+      imageDataUrl: imageDataUrl.trim(),
       to: NOTE_TARGET,
-      writtenBy,
-      botName,
-      humanName,
       createdAt: new Date().toISOString()
     };
 

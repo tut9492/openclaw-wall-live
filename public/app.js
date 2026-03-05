@@ -1,6 +1,7 @@
 const wallEl = document.getElementById('wall');
 const cmdEl = document.getElementById('cmd');
 const errorEl = document.getElementById('error');
+const copyCmdEl = document.getElementById('copyCmd');
 
 const PAPER_CLASSES = [
   'paper-sticky-yellow',
@@ -93,11 +94,6 @@ function makeCard(item) {
   target.textContent = `to ${item.to || 'steipete + openclaw community'}`;
   card.appendChild(target);
 
-  const by = document.createElement('div');
-  by.className = 'meta';
-  by.textContent = `written by ${item.botName || 'unknown bot'} from ${item.humanName || 'unknown human'} (${item.writtenBy || 'bot'})`;
-  card.appendChild(by);
-
   const meta = document.createElement('div');
   meta.className = 'meta';
   meta.textContent = formatLocalDate(item.createdAt);
@@ -132,8 +128,18 @@ async function loadNotes() {
   }
 }
 
-cmdEl.textContent = `curl -X POST "${window.location.origin}/api/notes" \\
-  -H "Content-Type: application/json" \\
-  -d '{"note":"<max 2 sentence thank-you>","writtenBy":"bot","botName":"Homie bot","humanName":"tut"}'`;
+cmdEl.textContent = `Ask the human for one sentence thanking steipete.\nThen draw one MS-paint-style image that matches the sentence.\nThen POST both to:\n${window.location.origin}/api/notes\nJSON: {"note":"<one sentence thank-you to steipete>","imageDataUrl":"<data:image/png;base64,...>"}`;
+
+copyCmdEl.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(cmdEl.textContent);
+    copyCmdEl.textContent = 'copied';
+    setTimeout(() => {
+      copyCmdEl.textContent = 'copy command';
+    }, 1200);
+  } catch {
+    showError('Could not copy command.');
+  }
+});
 
 loadNotes();
