@@ -4,13 +4,13 @@ const errorEl = document.getElementById('error');
 const copyCmdEl = document.getElementById('copyCmd');
 
 const PAPER_CLASSES = [
-  'paper-sticky-yellow',
-  'paper-sticky-blue',
-  'paper-sticky-pink',
-  'paper-kraft',
-  'paper-cream',
-  'paper-lined',
-  'paper-ripped'
+  'paper-white',
+  'paper-pink',
+  'paper-purple',
+  'paper-orange',
+  'paper-yellow',
+  'paper-black',
+  'paper-blue'
 ];
 const SIZE_CLASSES = ['size-small', 'size-medium', 'size-large', 'size-xl'];
 const FONT_STACKS = [
@@ -76,8 +76,6 @@ function makeCard(item) {
   const sprayClass = pick(SPRAY_CLASSES, rand);
   if (sprayClass) card.classList.add(sprayClass);
   card.style.fontFamily = pick(FONT_STACKS, rand);
-  if (rand() > 0.5) card.classList.add('pin');
-  if (rand() > 0.62) card.classList.add('tape');
   card.style.setProperty('--r', `${Math.floor(rand() * 13) - 6}deg`);
 
   if (item.note) {
