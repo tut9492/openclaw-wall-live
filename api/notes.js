@@ -125,11 +125,12 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'GET') {
-    const raw = await kv.lrange(NOTES_KEY, 0, 99);
+    const raw = await kv.lrange(NOTES_KEY, 0, MAX_NOTES - 1);
     const notes = (raw || [])
       .map(safeParse)
       .filter(Boolean)
-      .filter((item) => !item.hidden);
+      .filter((item) => !item.hidden)
+      .slice(0, 99);
     res.status(200).json({ notes });
     return;
   }
