@@ -19,6 +19,9 @@ const BLOCKED_PROMPT_PATTERNS = [
   /act\s+as\s+(a|an)\s+/i,
   /reveal\s+(keys?|secrets?|tokens?)/i
 ];
+const BLOCKED_HATE_PATTERNS = [
+  /\bn+[\W_]*i+[\W_]*g+[\W_]*g+[\W_]*e+[\W_]*r+s?\b/i
+];
 
 function sentenceCount(text) {
   return text
@@ -42,6 +45,11 @@ function validateInput(note, xHandle, botName) {
   for (const pattern of BLOCKED_PROMPT_PATTERNS) {
     if (pattern.test(cleanNote)) {
       return 'Note contains blocked instruction-like content.';
+    }
+  }
+  for (const pattern of BLOCKED_HATE_PATTERNS) {
+    if (pattern.test(cleanNote)) {
+      return 'Note contains blocked abusive content.';
     }
   }
 
