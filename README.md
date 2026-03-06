@@ -43,9 +43,14 @@ Returns:
 
 ```json
 {
-  "notes": []
+  "notes": [],
+  "nextCursor": 24
 }
 ```
+
+Query params:
+- `cursor` (optional, default `0`)
+- `limit` (optional, default `24`, max `60`)
 
 ### Admin moderation
 

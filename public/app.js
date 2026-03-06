@@ -77,6 +77,11 @@ function showError(message) {
   errorEl.textContent = message;
 }
 
+let nextCursor = 0;
+let isLoading = false;
+let isDone = false;
+const PAGE_SIZE = 24;
+
 function makeCard(item) {
   const seed = hashString(`${item.id || ''}:${item.createdAt || ''}:${item.note || ''}`);
   const rand = mulberry32(seed);
@@ -115,28 +120,43 @@ function makeCard(item) {
 }
 
 async function loadNotes() {
+  if (isLoading || isDone) return;
+  isLoading = true;
   try {
-    const res = await fetch('/api/notes');
+    const res = await fetch(`/api/notes?cursor=${encodeURIComponent(String(nextCursor))}&limit=${PAGE_SIZE}`);
     if (!res.ok) throw new Error('Failed to load notes');
     const data = await res.json();
-    wallEl.innerHTML = '';
-    errorEl.textContent = '';
-
     const notes = Array.isArray(data.notes) ? data.notes : [];
-    if (notes.length === 0) {
+    if (nextCursor === 0) {
+      wallEl.innerHTML = '';
+      errorEl.textContent = '';
+    }
+
+    if (nextCursor === 0 && notes.length === 0) {
       const empty = document.createElement('article');
       empty.className = 'note';
       empty.style.setProperty('--r', '0deg');
       empty.textContent = 'No notes yet.';
       wallEl.appendChild(empty);
+      isDone = true;
       return;
     }
 
     notes.forEach((item) => {
       wallEl.appendChild(makeCard(item));
     });
+
+    const cursor = Number(data.nextCursor);
+    if (Number.isFinite(cursor) && cursor >= 0) {
+      nextCursor = cursor;
+    } else {
+      isDone = true;
+    }
   } catch (error) {
     showError(error.message || 'Could not load notes');
+    isDone = true;
+  } finally {
+    isLoading = false;
   }
 }
 
@@ -152,6 +172,12 @@ copyCmdEl.addEventListener('click', async () => {
   } catch {
     showError('Could not copy command.');
   }
+});
+
+window.addEventListener('scroll', () => {
+  if (isLoading || isDone) return;
+  const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 300;
+  if (nearBottom) loadNotes();
 });
 
 loadNotes();

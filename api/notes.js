@@ -125,13 +125,29 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'GET') {
-    const raw = await kv.lrange(NOTES_KEY, 0, MAX_NOTES - 1);
-    const notes = (raw || [])
-      .map(safeParse)
-      .filter(Boolean)
-      .filter((item) => !item.hidden)
-      .slice(0, 99);
-    res.status(200).json({ notes });
+    const cursorRaw = Number.parseInt(String(req.query?.cursor ?? '0'), 10);
+    const limitRaw = Number.parseInt(String(req.query?.limit ?? '24'), 10);
+    const cursor = Number.isFinite(cursorRaw) && cursorRaw >= 0 ? cursorRaw : 0;
+    const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 60) : 24;
+
+    const raw = await kv.lrange(NOTES_KEY, cursor, MAX_NOTES - 1);
+    const parsed = (raw || []).map(safeParse).filter(Boolean);
+
+    const notes = [];
+    let nextCursor = null;
+
+    for (let i = 0; i < parsed.length; i += 1) {
+      const item = parsed[i];
+      const rawIndex = cursor + i;
+      if (item.hidden) continue;
+      notes.push(item);
+      if (notes.length >= limit) {
+        nextCursor = rawIndex + 1;
+        break;
+      }
+    }
+
+    res.status(200).json({ notes, nextCursor });
     return;
   }
 
