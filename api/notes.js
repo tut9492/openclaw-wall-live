@@ -47,13 +47,41 @@ function validateInput(note, xHandle, botName) {
       return 'Note contains blocked instruction-like content.';
     }
   }
+
+  return null;
+}
+
+function normalizeText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\\s]/g, ' ')
+    .replace(/\\s+/g, ' ')
+    .trim();
+}
+
+function getModerationFlags(note, existingNotes) {
+  const flags = [];
+  const cleanNote = String(note || '');
+  const normalized = normalizeText(cleanNote);
+
   for (const pattern of BLOCKED_HATE_PATTERNS) {
     if (pattern.test(cleanNote)) {
-      return 'Note contains blocked abusive content.';
+      flags.push('hate_speech');
+      break;
     }
   }
 
-  return null;
+  if (normalized) {
+    for (const item of existingNotes) {
+      if (!item || item.hidden) continue;
+      if (normalizeText(item.note) === normalized) {
+        flags.push('duplicate');
+        break;
+      }
+    }
+  }
+
+  return flags;
 }
 
 function getIp(req) {
@@ -175,12 +203,18 @@ export default async function handler(req, res) {
       return;
     }
 
+    const raw = await kv.lrange(NOTES_KEY, 0, MAX_NOTES - 1);
+    const existingNotes = (raw || []).map(safeParse).filter(Boolean);
+    const moderationFlags = getModerationFlags(note, existingNotes);
+    const isHidden = moderationFlags.length > 0;
+
     const entry = {
       id: crypto.randomUUID(),
       note: note.trim(),
       xHandle: xHandle.trim(),
       botName: botName.trim(),
-      hidden: false,
+      hidden: isHidden,
+      hiddenReason: moderationFlags,
       createdAt: new Date().toISOString()
     };
 
